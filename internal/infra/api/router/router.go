@@ -1,9 +1,6 @@
 package router
 
 import (
-	"net/http"
-
-	"fbc-bookings/internal/domain/entity"
 	"fbc-bookings/internal/infra/api/handler"
 	"fbc-bookings/internal/infra/api/router/groups"
 	"github.com/labstack/echo/v4/middleware"
@@ -35,9 +32,5 @@ func (r *Router) Init() {
 
 	r.bookings.Resource(basePath)
 
-	r.server.RouteNotFound("*", func(c echo.Context) error {
-		return c.JSON(http.StatusNotFound, entity.Response{
-			Message: "Sorry, page not found",
-		})
-	})
+	r.server.RouteNotFound("*", handler.NotFound)
 }
