@@ -6,7 +6,7 @@ import (
 	"fbc-bookings/internal/infra/api/handler"
 	"fbc-bookings/internal/infra/api/router"
 	"fbc-bookings/internal/infra/api/router/groups"
-	"fbc-bookings/internal/infra/resource/postgres"
+	"fbc-bookings/internal/infra/resources/postgres"
 	"github.com/labstack/echo/v4"
 	"go.uber.org/dig"
 )
