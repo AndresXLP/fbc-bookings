@@ -27,8 +27,10 @@ func BuildContainer() *dig.Container {
 	_ = Container.Provide(router.New)
 
 	_ = Container.Provide(groups.NewBookingGroup)
+	_ = Container.Provide(groups.NewPaymentsGroup)
 
 	_ = Container.Provide(handler.NewBookingHandler)
+	_ = Container.Provide(handler.NewPaymentsHandler)
 
 	_ = Container.Provide(app.NewBookingApp)
 

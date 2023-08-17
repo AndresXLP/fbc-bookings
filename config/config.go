@@ -11,6 +11,7 @@ import (
 type Config struct {
 	Server   Server   `validate:"required" mapstructure:"server"`
 	Postgres Postgres `validate:"required" mapstructure:"postgres"`
+	Payments Payments `validate:"required" mapstructure:"payments"`
 }
 
 type Server struct {
@@ -24,6 +25,10 @@ type Postgres struct {
 	DbUser     string `validate:"required" mapstructure:"db_user"`
 	DbPassword string `validate:"required" mapstructure:"db_password"`
 	DbName     string `validate:"required" mapstructure:"db_name"`
+}
+
+type Payments struct {
+	Secret string `validate:"required" mapstructure:"secret"`
 }
 
 var (

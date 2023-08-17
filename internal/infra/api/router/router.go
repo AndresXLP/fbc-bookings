@@ -11,12 +11,14 @@ import (
 type Router struct {
 	server   *echo.Echo
 	bookings groups.Bookings
+	payments groups.Payments
 }
 
-func New(server *echo.Echo, bookings groups.Bookings) *Router {
+func New(server *echo.Echo, bookings groups.Bookings, payments groups.Payments) *Router {
 	return &Router{
 		server,
 		bookings,
+		payments,
 	}
 }
 
@@ -31,6 +33,7 @@ func (r *Router) Init() {
 	basePath.GET("/health", handler.HealthCheck)
 
 	r.bookings.Resource(basePath)
+	r.payments.Resource(basePath)
 
 	r.server.RouteNotFound("*", handler.NotFound)
 }
