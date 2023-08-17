@@ -103,7 +103,7 @@ func (b *BookingRequest) BuildModel(request dto.BookingRequest) {
 		Phone:        request.BookedBy.Phone,
 	}
 	b.BookingUsers = funk.Map(request.BookingUsers, func(v dto.User) User {
-		if v.Age >= 18 {
+		if v.Age > 11 {
 			places++
 		}
 		return User{
