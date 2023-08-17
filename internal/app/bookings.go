@@ -13,7 +13,7 @@ import (
 )
 
 type Bookings interface {
-	GetBookingsDate(ctx context.Context, date time.Time) ([]dto.BookingDateResponse, error)
+	GetBookingsDateByDate(ctx context.Context, date time.Time) ([]dto.BookingDateResponse, error)
 	GetBookingsDateWithReservedPlaces(ctx context.Context, date time.Time) (dto.BookingsDatesWithReservedPlacesResponse, error)
 	CreateBookingsDates(ctx context.Context, newBookings dto.BookingsDatesRequest) ([]dto.BookingDateResponse, error)
 	CreateBooking(ctx context.Context, bookingRequest dto.BookingRequest) (dto.BookingResponse, error)
@@ -27,8 +27,8 @@ func NewBookingApp(repo repo.Repository) Bookings {
 	return &bookings{repo}
 }
 
-func (app *bookings) GetBookingsDate(ctx context.Context, date time.Time) ([]dto.BookingDateResponse, error) {
-	return app.repo.GetBookingsDate(ctx, date)
+func (app *bookings) GetBookingsDateByDate(ctx context.Context, date time.Time) ([]dto.BookingDateResponse, error) {
+	return app.repo.GetBookingsDateByDate(ctx, date)
 }
 
 func (app *bookings) GetBookingsDateWithReservedPlaces(ctx context.Context, date time.Time) (dto.BookingsDatesWithReservedPlacesResponse, error) {
@@ -47,7 +47,7 @@ func (app *bookings) GetBookingsDateWithReservedPlaces(ctx context.Context, date
 }
 
 func (app *bookings) CreateBookingsDates(ctx context.Context, newBookingsDates dto.BookingsDatesRequest) ([]dto.BookingDateResponse, error) {
-	bookingsDates, _ := app.GetBookingsDate(ctx, newBookingsDates.BookingsDates[0].CheckIn)
+	bookingsDates, _ := app.GetBookingsDateByDate(ctx, newBookingsDates.BookingsDates[0].CheckIn)
 	if len(bookingsDates) > 0 {
 		return []dto.BookingDateResponse{}, echo.NewHTTPError(http.StatusUnprocessableEntity, entity.Response{Message: "Ya existen fechas de reservas para el dia seleccionado"})
 	}
@@ -65,9 +65,21 @@ func (app *bookings) CreateBookingsDates(ctx context.Context, newBookingsDates d
 func (app *bookings) CreateBooking(ctx context.Context, bookingRequest dto.BookingRequest) (dto.BookingResponse, error) {
 	var bookingRequestModel model.BookingRequest
 
-	booking, err := app.repo.GetBookingByUserIDAndBookingDateID(ctx, bookingRequest.BookedBy.ID, bookingRequest.BookingDateId)
+	bookingDate, err := app.repo.GetBookingDateByID(ctx, bookingRequest.BookingDateId)
+	if err != nil {
+		return dto.BookingResponse{}, echo.NewHTTPError(http.StatusInternalServerError, entity.Response{Message: err.Error()})
+	}
 
-	if booking.ID != 0 {
+	if bookingDate.ID == 0 {
+		return dto.BookingResponse{}, echo.NewHTTPError(http.StatusUnprocessableEntity, entity.Response{Message: "booking date not found"})
+	}
+
+	bookingByUser, err := app.repo.GetBookingByUserIDAndBookingDateID(ctx, bookingRequest.BookedBy.ID, bookingRequest.BookingDateId)
+	if err != nil {
+		return dto.BookingResponse{}, echo.NewHTTPError(http.StatusInternalServerError, entity.Response{Message: err.Error()})
+	}
+
+	if bookingByUser.ID != 0 {
 		return dto.BookingResponse{}, echo.NewHTTPError(http.StatusUnprocessableEntity, entity.Response{
 			Message: "the user already has an active reservation for this day",
 		})
