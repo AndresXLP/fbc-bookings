@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"fbc-bookings/internal/domain/dto"
@@ -24,6 +25,7 @@ func (hand *payments) ProcessPayment(c echo.Context) error {
 		return err
 	}
 
-	request.GetCheckSum256()
+	checsum := request.GetCheckSum256()
+	fmt.Println(checsum == request.Signature.Checksum)
 	return c.JSON(http.StatusOK, request)
 }
