@@ -19,11 +19,12 @@ func NewRepository(db *gorm.DB) repo.Repository {
 	return &repository{db}
 }
 
-func (repo repository) GetBookingsDate(ctx context.Context, date time.Time) ([]dto.BookingDateResponse, error) {
+func (repo repository) GetBookingsDateByDate(ctx context.Context, date time.Time) ([]dto.BookingDateResponse, error) {
 	var bookings model.BookingsDates
 
 	repo.db.WithContext(ctx).
 		Table("booking_dates").
+		Where("DATE(check_in) = DATE(?)", date).
 		Scan(&bookings)
 
 	return bookings.ToDomainDTO(), nil
@@ -129,4 +130,17 @@ func (repo repository) GetBookingByUserIDAndBookingDateID(ctx context.Context, u
 	}
 
 	return booking.ToDomainEntity(), nil
+}
+
+func (repo repository) GetBookingDateByID(ctx context.Context, bookingDateID int) (dto.BookingDateResponse, error) {
+	bookingDate := model.BookingDate{}
+	if err := repo.db.WithContext(ctx).
+		Table("booking_dates").
+		Where("ID =?", bookingDateID).
+		Scan(&bookingDate).
+		Error; err != nil {
+		return dto.BookingDateResponse{}, err
+	}
+
+	return bookingDate.ToDomainDTO(), nil
 }
