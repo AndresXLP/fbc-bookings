@@ -42,7 +42,7 @@ type Signature struct {
 	Checksum   string   `json:"checksum"`
 }
 
-func (p *Payment) GetCheckSum256() string {
+func (p *Payment) ValidateChecksum() bool {
 	secret := config.Environments().Payments.Secret
 	data := ""
 
@@ -62,7 +62,7 @@ func (p *Payment) GetCheckSum256() string {
 		data += fmt.Sprintf("%v", fieldValue)
 	}
 	data += fmt.Sprintf("%d", p.Timestamp) + secret
-	hash := sha256.New().Sum([]byte(data))
+	hash := sha256.Sum256([]byte(data))
 
-	return hex.EncodeToString(hash)
+	return p.Signature.Checksum == hex.EncodeToString(hash[:])
 }

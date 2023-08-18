@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"fbc-bookings/internal/domain/dto"
+	"fbc-bookings/internal/domain/entity"
 	"github.com/labstack/echo/v4"
 )
 
@@ -25,7 +25,15 @@ func (hand *payments) ProcessPayment(c echo.Context) error {
 		return err
 	}
 
-	checsum := request.GetCheckSum256()
-	fmt.Println(checsum == request.Signature.Checksum)
-	return c.JSON(http.StatusOK, request)
+	if request.ValidateChecksum() {
+		// generar los cambios respectivos en la base de datos
+
+		return c.JSON(http.StatusOK, entity.Response{
+			Message: "Transaction processed successfully",
+		})
+	}
+
+	return c.JSON(http.StatusUnprocessableEntity, entity.Response{
+		Message: "invalid checksum",
+	})
 }
